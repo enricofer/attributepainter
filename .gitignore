@@ -3,3 +3,4 @@ Makefile
 *.log
 help/
 i18n/
+.DS_Store

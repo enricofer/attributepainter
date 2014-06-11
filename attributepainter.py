@@ -45,7 +45,7 @@ class attributePainter:
         colorSource = QColor(250,0,0,200)
         self.sourceEvid = QgsRubberBand(self.canvas, QGis.Line)
         self.sourceEvid.setColor(colorSource)
-        self.sourceEvid.setWidth(1)
+        self.sourceEvid.setWidth(3)
 
 
     def initGui(self):
@@ -65,6 +65,7 @@ class attributePainter:
         self.dock.tableWidget.setHorizontalHeaderItem(2,QTableWidgetItem("VALUE"))
         self.iface.addDockWidget( Qt.LeftDockWidgetArea, self.apdockwidget )
         #Call reset procedure to initialize widget
+        self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
         self.resetSource()
 
     #select or deselect items in qtablewidget on "select all attributes" checkbox clicked
@@ -77,6 +78,7 @@ class attributePainter:
     def selectSource(self): 
         #test if in currentlayer there are selected features
         if (self.canvas.layers()!=[] and self.canvas.currentLayer().selectedFeatures() != []):
+            self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
             #take first selected feature as source feature
             self.sourceFeat = self.canvas.currentLayer().selectedFeatures()[0]
             self.iface.activeLayer().removeSelection() 
@@ -97,7 +99,10 @@ class attributePainter:
                     #set second colunm as attribute label
                     self.dock.tableWidget.setItem(n,1,QTableWidgetItem(field_names[n]))
                     #set third column as attribute value
-                    self.dock.tableWidget.setItem(n,2,QTableWidgetItem(str(self.sourceFeat.attributes()[n])))
+                    item = QTableWidgetItem()
+                    item.setData(Qt.DisplayRole,self.sourceFeat.attributes()[n])
+                    self.dock.tableWidget.setItem(n,2,item)
+                    #self.dock.tableWidget.setItem(n,2,QTableWidgetItem(str(self.sourceFeat.attributes()[n])))
             #resize table to contents
             self.dock.tableWidget.resizeColumnsToContents()
             self.dock.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -111,11 +116,22 @@ class attributePainter:
             #Enable button to apply or reset
             self.dock.PickDestination.setEnabled(True)
             self.dock.ResetSource.setEnabled(True)
+            self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
         else:
             print "nothing selected"
 
+    def highLightCellOverride(obj,item):
+        if item.column() == 2:
+            item.setBackgroundColor (QColor(183,213,225))
+
     #method to clear source and reset attribute table
     def resetSource(self):
+        self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
+        self.doReset()
+        self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
+
+    #method to clear source and reset attribute table
+    def doReset(self):
         #clear source highlight
         self.sourceEvid.reset()
         #clear source definition
@@ -139,7 +155,8 @@ class attributePainter:
                 rowCheckbox = self.dock.tableWidget.item(rowTabWidget,0)
                 #take only selected attributes by checkbox
                 if rowCheckbox.checkState() == Qt.Checked:
-                    self.sourceAttrs.update({rowTabWidget:self.sourceFeat.attributes()[rowTabWidget]})
+                    #self.sourceAttrs.update({rowTabWidget:self.sourceFeat.attributes()[rowTabWidget]})
+                    self.sourceAttrs.update({rowTabWidget:self.dock.tableWidget.item(rowTabWidget,2).data(Qt.DisplayRole)})
             #apply source attribute values to selected destination features
             for f in self.canvas.currentLayer().selectedFeatures():
                 self.canvas.currentLayer().dataProvider().changeAttributeValues({f.id():self.sourceAttrs})
