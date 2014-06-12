@@ -1,0 +1,7 @@
+v1
+Emission
+
+v1.1 (12/6/2014)
+The plugin now allows to override the attributes values 
+simply editing the related cell. 
+Overridden attributes are highlighted on selection table

@@ -21,7 +21,7 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-# changelog=
+# changelog=1.1 The plugin now allows to override the attributes values simply editing the related cell. Overridden attributes are highlighted on selection table
 
 # tags are comma separated with spaces allowed
 tags = fields attributes copy replication 
