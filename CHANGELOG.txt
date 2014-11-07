@@ -5,3 +5,9 @@ v1.1 (12/6/2014)
 The plugin now allows to override the attributes values 
 simply editing the related cell. 
 Overridden attributes are highlighted on selection table
+
+v2.0 (7/11/2014)
+Edit buffer support
+Copy attributes between different layers
+Apply Attributes by names
+Highlight attribute compatibility
