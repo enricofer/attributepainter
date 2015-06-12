@@ -27,8 +27,8 @@ email=enricofer@gmail.com
 tags = fields, attributes, copy, replication, vector, layer, apply, edit, table
 
 homepage=http://geogear.wordpress.com/
-tracker=http://hub.qgis.org/projects/attributepainter
-repository=http://hub.qgis.org/projects/attributepainter/files
+tracker=https://github.com/enricofer/attributepainter/issues
+repository=https://github.com/enricofer/attributepainter/
 icon=icon.png
 # experimental flag
 experimental=False
