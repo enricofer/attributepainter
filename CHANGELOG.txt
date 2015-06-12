@@ -11,3 +11,6 @@ Edit buffer support
 Copy attributes between different layers
 Apply Attributes by names
 Highlight attribute compatibility
+
+v3.0 (12/06/2015)
+Pick to select sample feature directly on canvas

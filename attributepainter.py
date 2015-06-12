@@ -28,6 +28,7 @@ from qgis.utils import *
 from qgis.gui import *
 # Import the code for the dialog
 from attributepainterdialog import attributePainterDialog
+from identifygeometry import IdentifyGeometry
 # Initialize Qt resources from file resources.py
 import resources
 import sip
@@ -41,6 +42,8 @@ class attributePainter:
         # Save reference to the QGIS interface
         self.iface = iface
         self.canvas = self.iface.mapCanvas()
+        # initialize plugin directory
+        self.plugin_dir = os.path.dirname(__file__)
         # Source feature rubberband definition
         colorSource = QColor(250,0,0,200)
         self.sourceEvid = QgsRubberBand(self.canvas, QGis.Line)
@@ -49,6 +52,15 @@ class attributePainter:
 
 
     def initGui(self):
+        # Create action that will show plugin widget
+        self.action = QAction(
+            QIcon(os.path.join(self.plugin_dir,"icon.png")),
+            u"AttributePainter", self.iface.mainWindow())
+        # connect the action to the run method
+        self.action.triggered.connect(self.run)
+        # Add toolbar button and menu item
+        self.iface.addToolBarIcon(self.action)
+        self.iface.addPluginToMenu(u"&foglioMappale", self.action)
         #creating dock view intance
         self.dock = attributePainterDialog(self.iface)
         self.apdockwidget=QDockWidget("AttributePainter" , self.iface.mainWindow() )
@@ -57,7 +69,7 @@ class attributePainter:
         self.layerHighlighted = None
         self.sourceFeat = None
         #setting dock view buttons behavior
-        self.dock.PickSource.clicked.connect(self.selectSource)
+        self.dock.PickSource.clicked.connect(self.setMapTool)
         self.dock.ResetSource.clicked.connect(self.resetSource)
         self.dock.PickDestination.clicked.connect(self.applyToDestination)
         self.dock.PickDestination.setDisabled(True)
@@ -68,6 +80,9 @@ class attributePainter:
         self.iface.addDockWidget( Qt.LeftDockWidgetArea, self.apdockwidget )
         self.iface.projectRead.connect(self.resetSource)
         self.iface.newProjectCreated.connect(self.resetSource)
+        self.mapTool = IdentifyGeometry(self.canvas)
+        self.mapTool.geomIdentified.connect(self.editFeature)
+        #self.mapTool.setAction(self.mapToolAction)
         #Call reset procedure to initialize widget
         self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
         self.resetSource()
@@ -85,20 +100,23 @@ class attributePainter:
 
     #source feauture selection procedure
     def selectSource(self): 
-        if self.canvas.currentLayer().type() != QgsMapLayer.VectorLayer:
-            return
+        print self.selectedLayer.id(),self.activeLayer,self.sourceAttrs
+        if self.selectedLayer.type() == QgsMapLayer.VectorLayer:
+        #    return
         #test if in currentlayer there are selected features
-        if (self.canvas.layers()!=[] and self.canvas.currentLayer().selectedFeatures() != []):
+        #if (self.canvas.layers()!=[] and self.canvas.currentLayer().selectedFeatures() != []):
             if self.layerHighlighted:
                 self.resetSource()
-            self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
+            try:
+                self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
+            except:
+                pass
             #take first selected feature as source feature
-            self.sourceFeat = self.canvas.currentLayer().selectedFeatures()[0]
-            self.iface.activeLayer().removeSelection() 
+            self.sourceFeat = self.selectedFeature
             #hightlight source feature with rubberband
-            self.sourceEvid.setToGeometry(self.sourceFeat.geometry(),self.canvas.currentLayer())
+            self.sourceEvid.setToGeometry(self.sourceFeat.geometry(),self.selectedLayer)
             #get current layer attributes labels list
-            field_names = [field.name() for field in self.canvas.currentLayer().pendingFields()]
+            field_names = [field.name() for field in self.selectedLayer.pendingFields()]
             self.sourceAttrsTab=[]
             self.dock.tableWidget.setRowCount(len(field_names))
             #loading attributes labels and values in QTableWidget
@@ -125,10 +143,11 @@ class attributePainter:
             #self.layerHighlighted = self.canvas.currentLayer()
             #self.checkEditable()
             #procedure to recover same field selection if current source feature has the same layer of the precedent one
-            if self.canvas.currentLayer().id() != self.activeLayer:
+            if self.selectedLayer.id() != self.activeLayer:
                 self.sourceAttrs={}
-                self.activeLayer = self.canvas.currentLayer().id()
+                self.activeLayer = self.selectedLayer.id()
             else:
+                print "stessoLayer"
                 for Attr in self.sourceAttrs:
                     self.dock.tableWidget.item(Attr,0).setCheckState(Qt.Checked)
             #Enable button to apply or reset
@@ -147,6 +166,10 @@ class attributePainter:
 
     #landing method on current layer change
     def checkOnLayerChange(self,cLayer):
+        if cLayer:
+            print "LAYER CHANGE:",cLayer
+        else:
+            print "NO LAYER CHANGE:"
         if cLayer and cLayer.type() == QgsMapLayer.VectorLayer:
             if self.layerHighlighted:
                 self.layerHighlighted.editingStarted.disconnect(self.checkEditable)
@@ -190,20 +213,15 @@ class attributePainter:
 
     #method to clear source and reset attribute table
     def doReset(self):
-        #if self.layerHighlighted:
-        #    self.layerHighlighted.editingStarted.disconnect(self.editingChanged)
-        #    self.layerHighlighted.editingStopped.disconnect(self.editingChanged)
-        #    self.layerHighlighted = None
         self.dock.PickDestination.setDisabled(True)
         #clear source highlight
         self.sourceEvid.reset()
         #clear source definition
         self.sourceFeat = None
         self.sourceAttrs={}
-        self.activeLayer = ""
+        self.activeLayer = "nn"
         self.layerHighlighted = None
         #clear dock widget
-        #self.dock.tableWidget.clear()
         while self.dock.tableWidget.rowCount()>0:
             self.dock.tableWidget.removeRow(0)
         self.dock.PickDestination.setEnabled(False)
@@ -212,7 +230,6 @@ class attributePainter:
     #method to apply selected fields to selected destination features
     def applyToDestination(self):
         if self.canvas.currentLayer().selectedFeatures()!=[]:
-            #destFeat = self.canvas.currentLayer().selectedFeatures()
             #rebuild source attribute dict set to apply to destination features
             self.sourceAttrs={}
             for rowTabWidget in range(0,self.dock.tableWidget.rowCount()):
@@ -237,11 +254,29 @@ class attributePainter:
         else:
             print "nothing selected"
 
+    def run(self):
+        # show/hide the widget
+        if self.apdockwidget.isVisible():
+            self.apdockwidget.hide()
+            self.resetSource()
+        else:
+            self.apdockwidget.show()
+
     #Remove the plugin widget and clear source feature highlight
     def unload(self):
         if self.sourceFeat:
             self.sourceEvid.reset()
-        self.iface.removeDockWidget( self.apdockwidget)
-        sip.delete(self.apdockwidget)
-        self.apdockwidget = None
+        self.iface.removeToolBarIcon(self.action)
+        self.iface.removeDockWidget(self.apdockwidget)
 
+    def editFeature(self,layer,feature):
+        self.selectedLayer = layer
+        self.selectedFeature = feature
+        self.iface.setActiveLayer(self.selectedLayer)
+        self.dock.PickSource.setDown(False)
+        self.canvas.setMapTool(None)
+        self.selectSource()
+
+    def setMapTool(self):
+        self.dock.PickSource.setDown(True)
+        self.canvas.setMapTool(self.mapTool)
