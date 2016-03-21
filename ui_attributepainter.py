@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_attributepainter.ui'
+# Form implementation generated from reading ui file '/home/enrico/Dropbox/dev/attributePainter/ui_attributepainter.ui'
 #
-# Created: Mon Mar 24 08:03:46 2014
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Mon Mar 21 21:53:50 2016
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,17 +12,27 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_AttributePainterForm(object):
     def setupUi(self, AttributePainterForm):
         AttributePainterForm.setObjectName(_fromUtf8("AttributePainterForm"))
-        AttributePainterForm.resize(300, 300)
+        AttributePainterForm.resize(300, 357)
         AttributePainterForm.setMinimumSize(QtCore.QSize(300, 300))
         AttributePainterForm.setMaximumSize(QtCore.QSize(300, 450))
         self.verticalLayout = QtGui.QVBoxLayout(AttributePainterForm)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.PickSource = QtGui.QPushButton(AttributePainterForm)
+        self.PickSource.setCheckable(True)
         self.PickSource.setObjectName(_fromUtf8("PickSource"))
         self.verticalLayout.addWidget(self.PickSource)
         self.checkBox = QtGui.QCheckBox(AttributePainterForm)
@@ -46,17 +56,25 @@ class Ui_AttributePainterForm(object):
         self.ResetSource = QtGui.QPushButton(AttributePainterForm)
         self.ResetSource.setObjectName(_fromUtf8("ResetSource"))
         self.verticalLayout.addWidget(self.ResetSource)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.PickDestination = QtGui.QPushButton(AttributePainterForm)
         self.PickDestination.setObjectName(_fromUtf8("PickDestination"))
-        self.verticalLayout.addWidget(self.PickDestination)
+        self.horizontalLayout.addWidget(self.PickDestination)
+        self.PickApply = QtGui.QPushButton(AttributePainterForm)
+        self.PickApply.setCheckable(True)
+        self.PickApply.setObjectName(_fromUtf8("PickApply"))
+        self.horizontalLayout.addWidget(self.PickApply)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(AttributePainterForm)
         QtCore.QMetaObject.connectSlotsByName(AttributePainterForm)
 
     def retranslateUi(self, AttributePainterForm):
-        AttributePainterForm.setWindowTitle(QtGui.QApplication.translate("AttributePainterForm", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.PickSource.setText(QtGui.QApplication.translate("AttributePainterForm", "Pick source feature", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox.setText(QtGui.QApplication.translate("AttributePainterForm", "Select all attributes", None, QtGui.QApplication.UnicodeUTF8))
-        self.ResetSource.setText(QtGui.QApplication.translate("AttributePainterForm", "Reset source", None, QtGui.QApplication.UnicodeUTF8))
-        self.PickDestination.setText(QtGui.QApplication.translate("AttributePainterForm", "Apply attributes to selected features", None, QtGui.QApplication.UnicodeUTF8))
+        AttributePainterForm.setWindowTitle(_translate("AttributePainterForm", "Form", None))
+        self.PickSource.setText(_translate("AttributePainterForm", "Pick source feature", None))
+        self.checkBox.setText(_translate("AttributePainterForm", "Select all attributes", None))
+        self.ResetSource.setText(_translate("AttributePainterForm", "Reset source", None))
+        self.PickDestination.setText(_translate("AttributePainterForm", "Apply  to selection", None))
+        self.PickApply.setText(_translate("AttributePainterForm", "Pick to Apply", None))
 

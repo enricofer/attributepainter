@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>300</height>
+    <height>357</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -30,6 +30,9 @@
     <widget class="QPushButton" name="PickSource">
      <property name="text">
       <string>Pick source feature</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -74,11 +77,25 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="PickDestination">
-     <property name="text">
-      <string>Apply attributes to selected features</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="PickDestination">
+       <property name="text">
+        <string>Apply  to selection</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="PickApply">
+       <property name="text">
+        <string>Pick to Apply</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

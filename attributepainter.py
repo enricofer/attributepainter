@@ -69,10 +69,11 @@ class attributePainter:
         self.layerHighlighted = None
         self.sourceFeat = None
         #setting dock view buttons behavior
-        self.dock.PickSource.clicked.connect(self.setMapTool)
+        self.dock.PickSource.toggled.connect(self.setSourceMapTool)
         self.dock.ResetSource.clicked.connect(self.resetSource)
         self.dock.PickDestination.clicked.connect(self.applyToDestination)
         self.dock.PickDestination.setDisabled(True)
+        self.dock.PickApply.toggled.connect(self.setDestinationMapTool)
         self.dock.checkBox.clicked.connect(self.selectAllCheckbox)
         self.dock.tableWidget.setColumnCount(3)
         self.initTable()
@@ -80,8 +81,10 @@ class attributePainter:
         self.iface.addDockWidget( Qt.LeftDockWidgetArea, self.apdockwidget )
         self.iface.projectRead.connect(self.resetSource)
         self.iface.newProjectCreated.connect(self.resetSource)
-        self.mapTool = IdentifyGeometry(self.canvas)
-        self.mapTool.geomIdentified.connect(self.editFeature)
+        self.sourceMapTool = IdentifyGeometry(self.canvas,pickMode='selection')
+        self.destinationMapTool = IdentifyGeometry(self.canvas,pickMode='active')
+        self.sourceMapTool.geomIdentified.connect(self.setSourceFeature)
+        self.destinationMapTool.geomIdentified.connect(self.setDestinationFeature)
         #self.mapTool.setAction(self.mapToolAction)
         #Call reset procedure to initialize widget
         self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
@@ -98,65 +101,91 @@ class attributePainter:
         self.dock.tableWidget.setHorizontalHeaderItem(2,QTableWidgetItem("VALUE"))
         
 
+    def setComboField(self,content,type,layer):
+        combo = QComboBox();
+        fieldNames = self.scanLayerFieldsNames(layer)
+        fieldTypes = self.scanLayerFieldsTypes(layer)
+        choices = []
+        for n in range(0,len(fieldTypes)):
+            if fieldTypes[n] == type:
+                choices.append(fieldNames[n])
+        combo.addItems(choices)
+        if content in choices:
+            combo.setCurrentIndex(choices.index(content))
+        else:
+            combo.addItem(content)
+            combo.setCurrentIndex(combo.count()-1)
+        combo.activated.connect(lambda: self.highlightCompatibleFields(LayerChange=None))
+        return combo
+        
+
+    def scanLayerFieldsNames(self,layer):
+        if layer:
+            return [field.name() for field in layer.pendingFields()]
+        else:
+            return []
+
+    def scanLayerFieldsTypes(self,layer):
+        if layer:
+            return [field.type() for field in layer.pendingFields()]
+        else:
+            return []
+
     #source feauture selection procedure
     def selectSource(self): 
-        print self.selectedLayer.id(),self.activeLayer,self.sourceAttrs
-        if self.selectedLayer.type() == QgsMapLayer.VectorLayer:
-        #    return
-        #test if in currentlayer there are selected features
-        #if (self.canvas.layers()!=[] and self.canvas.currentLayer().selectedFeatures() != []):
-            if self.layerHighlighted:
-                self.resetSource()
-            try:
-                self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
-            except:
-                pass
-            #take first selected feature as source feature
-            self.sourceFeat = self.selectedFeature
-            #hightlight source feature with rubberband
-            self.sourceEvid.setToGeometry(self.sourceFeat.geometry(),self.selectedLayer)
-            #get current layer attributes labels list
-            field_names = [field.name() for field in self.selectedLayer.pendingFields()]
-            self.sourceAttrsTab=[]
-            self.dock.tableWidget.setRowCount(len(field_names))
-            #loading attributes labels and values in QTableWidget
-            for n in range(0,len(field_names)):
-                    item=QTableWidgetItem()
-                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-                    item.setCheckState(Qt.Unchecked)
-                    item.setText("")
-                    #set first column as checkbox
-                    self.dock.tableWidget.setItem(n,0,item)
-                    #set second colunm as attribute label
-                    self.dock.tableWidget.setItem(n,1,QTableWidgetItem(field_names[n]))
-                    #set third column as attribute value
-                    item = QTableWidgetItem()
-                    item.setData(Qt.DisplayRole,self.sourceFeat.attributes()[n])
-                    self.dock.tableWidget.setItem(n,2,item)
-                    #self.dock.tableWidget.setItem(n,2,QTableWidgetItem(str(self.sourceFeat.attributes()[n])))
-            #resize table to contents
-            self.dock.tableWidget.resizeColumnsToContents()
-            self.dock.tableWidget.horizontalHeader().setStretchLastSection(True)
-            #catch editing signals on current layer
-            #self.canvas.currentLayer().editingStarted.connect(self.checkEditable)
-            #self.canvas.currentLayer().editingStopped.connect(self.checkEditable)
-            #self.layerHighlighted = self.canvas.currentLayer()
-            #self.checkEditable()
-            #procedure to recover same field selection if current source feature has the same layer of the precedent one
-            if self.selectedLayer.id() != self.activeLayer:
-                self.sourceAttrs={}
-                self.activeLayer = self.selectedLayer.id()
-            else:
-                print "stessoLayer"
-                for Attr in self.sourceAttrs:
-                    self.dock.tableWidget.item(Attr,0).setCheckState(Qt.Checked)
-            #Enable button to apply or reset
-            #self.dock.PickDestination.setEnabled(True)
-            self.dock.ResetSource.setEnabled(True)
-            self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
-            self.checkOnLayerChange(self.canvas.currentLayer())
+        print "LAYER",self.selectedLayer.id(),self.activeLayer,self.sourceAttrs
+
+        if self.layerHighlighted:
+            self.resetSource()
+        try:
+            self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
+        except:
+            pass
+        #take first selected feature as source feature
+        self.sourceFeat = self.selectedFeature
+        #hightlight source feature with rubberband
+        self.sourceEvid.setToGeometry(self.sourceFeat.geometry(),self.selectedLayer)
+        #get current layer attributes labels list
+        field_names = self.scanLayerFieldsNames(self.selectedLayer)
+        field_types = self.scanLayerFieldsTypes(self.selectedLayer)
+        self.sourceAttrsTab=[]
+        self.dock.tableWidget.setRowCount(len(field_names))
+        #loading attributes labels and values in QTableWidget
+        for n in range(0,len(field_names)):
+                item=QTableWidgetItem()
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                item.setCheckState(Qt.Unchecked)
+                item.setText("")
+                #set first column as checkbox
+                self.dock.tableWidget.setItem(n,0,item)
+                #set second colunm as attribute label
+                self.dock.tableWidget.setCellWidget(n,1,self.setComboField(field_names[n],field_types[n],self.canvas.currentLayer()))
+                #set third column as attribute value
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole,self.sourceFeat.attributes()[n])
+                self.dock.tableWidget.setItem(n,2,item)
+                #self.dock.tableWidget.setItem(n,2,QTableWidgetItem(str(self.sourceFeat.attributes()[n])))
+        #resize table to contents
+        self.dock.tableWidget.resizeColumnsToContents()
+        self.dock.tableWidget.horizontalHeader().setStretchLastSection(True)
+        #catch editing signals on current layer
+        #self.canvas.currentLayer().editingStarted.connect(self.checkEditable)
+        #self.canvas.currentLayer().editingStopped.connect(self.checkEditable)
+        #self.layerHighlighted = self.canvas.currentLayer()
+        #self.checkEditable()
+        #procedure to recover same field selection if current source feature has the same layer of the precedent one
+        if self.selectedLayer.id() != self.activeLayer:
+            self.sourceAttrs={}
+            self.activeLayer = self.selectedLayer.id()
         else:
-            print "nothing selected"
+            print "stessoLayer"
+            for Attr in self.sourceAttrs:
+                self.dock.tableWidget.item(Attr,0).setCheckState(Qt.Checked)
+        #Enable button to apply or reset
+        #self.dock.PickDestination.setEnabled(True)
+        self.dock.ResetSource.setEnabled(True)
+        self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
+        self.checkOnLayerChange(self.canvas.currentLayer())
 
     #landing method on cell value change
     def highLightCellOverride(obj,item):
@@ -181,16 +210,20 @@ class attributePainter:
                 cLayer.editingStopped.connect(self.checkEditable)
     
     #method to highlight compatible field on selected feature (even on different layer)
-    def highlightCompatibleFields(self):
+    def highlightCompatibleFields(self, LayerChange = True):
         if self.dock.tableWidget.rowCount()>0:
-            field_names = [field.name() for field in self.canvas.currentLayer().pendingFields()]
+            source_field_names = self.scanLayerFieldsNames(self.selectedLayer)
+            source_field_types = self.scanLayerFieldsTypes(self.selectedLayer)
+            destination_field_names = self.scanLayerFieldsNames(self.canvas.currentLayer())
             self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
             for row in range (0,self.dock.tableWidget.rowCount()):
-                if self.dock.tableWidget.item(row,1).text() in field_names:
-                    self.dock.tableWidget.item(row,1).setForeground(QBrush(QColor(0,0,0)))
+                if LayerChange:
+                    self.dock.tableWidget.setCellWidget(row,1,self.setComboField(source_field_names[row],source_field_types[row],self.canvas.currentLayer()))
+                if self.dock.tableWidget.cellWidget(row,1).currentText() in destination_field_names:
+                    #self.dock.tableWidget.item(row,1).setForeground(QBrush(QColor(0,0,0)))
                     self.dock.tableWidget.item(row,2).setForeground(QBrush(QColor(0,0,0)))
                 else:
-                    self.dock.tableWidget.item(row,1).setForeground(QBrush(QColor(130,130,130)))
+                    #self.dock.tableWidget.item(row,1).setForeground(QBrush(QColor(130,130,130)))
                     self.dock.tableWidget.item(row,2).setForeground(QBrush(QColor(130,130,130)))
             self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
 
@@ -200,8 +233,10 @@ class attributePainter:
             self.highlightCompatibleFields()
             if self.layerHighlighted.isEditable() and self.sourceFeat:
                 self.dock.PickDestination.setEnabled(True)
+                self.dock.PickApply.setEnabled(True)
             else:
                 self.dock.PickDestination.setDisabled(True)
+                self.dock.PickApply.setDisabled(True)
     
     #method to clear source and reset attribute table
     def resetSource(self):
@@ -230,29 +265,32 @@ class attributePainter:
     #method to apply selected fields to selected destination features
     def applyToDestination(self):
         if self.canvas.currentLayer().selectedFeatures()!=[]:
-            #rebuild source attribute dict set to apply to destination features
-            self.sourceAttrs={}
-            for rowTabWidget in range(0,self.dock.tableWidget.rowCount()):
-                rowCheckbox = self.dock.tableWidget.item(rowTabWidget,0)
-                #take only selected attributes by checkbox
-                if rowCheckbox.checkState() == Qt.Checked:
-                    #self.sourceAttrs.update({rowTabWidget:self.sourceFeat.attributes()[rowTabWidget]})
-                    self.sourceAttrs.update({rowTabWidget:[self.dock.tableWidget.item(rowTabWidget,1).data(Qt.DisplayRole),self.dock.tableWidget.item(rowTabWidget,2).data(Qt.DisplayRole)]})
+            self.sourceAttributes = self.getSourceAttrs()
             #apply source attribute values to selected destination features
             for f in self.canvas.currentLayer().selectedFeatures():
-                #self.canvas.currentLayer().dataProvider().changeAttributeValues({f.id():self.sourceAttrs})
-                #self.canvas.currentLayer().changeAttributeValues({f.id():self.sourceAttrs})
-                for attrId,attrValue in self.sourceAttrs.items():
-                    #self.canvas.currentLayer().changeAttributeValue(f.id(),attrId,attrValue[1])
-                    #print attrId,attrValue[0],attrValue[1]
-                    try:
-                        f[attrValue[0]]=attrValue[1]
-                        self.canvas.currentLayer().updateFeature(f)
-                    except:
-                        pass
+                self.applyToFeature(f,self.sourceAttributes)
             self.iface.activeLayer().removeSelection() 
         else:
             print "nothing selected"
+
+    def getSourceAttrs(self):
+        #rebuild source attribute dict set to apply to destination features
+        sourceAttrs={}
+        for rowTabWidget in range(0,self.dock.tableWidget.rowCount()):
+            rowCheckbox = self.dock.tableWidget.item(rowTabWidget,0)
+            #take only checked attributes
+            if rowCheckbox.checkState() == Qt.Checked:
+                sourceAttrs.update({rowTabWidget:[self.dock.tableWidget.cellWidget(rowTabWidget,1).currentText(),self.dock.tableWidget.item(rowTabWidget,2).data(Qt.DisplayRole)]})
+        return sourceAttrs
+
+    def applyToFeature(self,feature,sourceSet):
+        print sourceSet.items()
+        for attrId,attrValue in sourceSet.items():
+            try:
+                feature[attrValue[0]]=attrValue[1]
+                self.canvas.currentLayer().updateFeature(feature)
+            except:
+                pass
 
     def run(self):
         # show/hide the widget
@@ -269,14 +307,31 @@ class attributePainter:
         self.iface.removeToolBarIcon(self.action)
         self.iface.removeDockWidget(self.apdockwidget)
 
-    def editFeature(self,layer,feature):
+    def setSourceFeature(self, layer, feature):
         self.selectedLayer = layer
         self.selectedFeature = feature
-        self.iface.setActiveLayer(self.selectedLayer)
-        self.dock.PickSource.setDown(False)
-        self.canvas.setMapTool(None)
+        #self.iface.setActiveLayer(self.selectedLayer)
+        self.dock.PickSource.setChecked(False)
+        self.canvas.setMapTool(self.oldMapTool)
         self.selectSource()
 
-    def setMapTool(self):
-        self.dock.PickSource.setDown(True)
-        self.canvas.setMapTool(self.mapTool)
+    def setDestinationFeature(self, layer, feature):
+        print layer,feature
+        sourceAttributes = self.getSourceAttrs()
+        self.applyToFeature(feature,sourceAttributes)
+
+    def setSourceMapTool(self, checked):
+        print "set source tool"
+        if checked:
+            self.oldMapTool = self.canvas.mapTool()
+            self.canvas.setMapTool(self.sourceMapTool)
+        else:
+            self.oldMapTool = self.canvas.mapTool()
+
+    def setDestinationMapTool(self,checked):
+        print "set destination tool"
+        if checked:
+            self.oldMapTool = self.canvas.mapTool()
+            self.canvas.setMapTool(self.destinationMapTool)
+        else:
+            self.canvas.setMapTool(self.oldMapTool)

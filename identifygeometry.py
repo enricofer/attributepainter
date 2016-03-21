@@ -37,16 +37,25 @@ from qgis.gui import QgsMapToolIdentify
 class IdentifyGeometry(QgsMapToolIdentify):
     geomIdentified = pyqtSignal(QgsVectorLayer, QgsFeature)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, pickMode = 'selection'):
         self.canvas = canvas
         QgsMapToolIdentify.__init__(self, canvas)
         self.setCursor(QCursor())
+        if pickMode == 'all':
+            self.selectionMode = self.TopDownStopAtFirst
+        elif pickMode == 'selection':
+            self.selectionMode = self.LayerSelection
+        elif pickMode == 'active':
+            self.selectionMode = self.ActiveLayer
 
     def canvasReleaseEvent(self, mouseEvent):
+        '''
         try:
-            results = self.identify(mouseEvent.x(), mouseEvent.y(), self.LayerSelection, self.AllLayers)
+            results = self.identify(mouseEvent.x(), mouseEvent.y(), self.LayerSelection, self.VectorLayer)
         except:
-            results = self.identify(mouseEvent.x(), mouseEvent.y(), self.TopDownStopAtFirst, self.AllLayers)
+        '''
+        print self.selectionMode
+        results = self.identify(mouseEvent.x(), mouseEvent.y(), self.selectionMode, self.VectorLayer)
         if len(results) > 0:
             self.geomIdentified.emit(results[0].mLayer, QgsFeature(results[0].mFeature))
 
