@@ -14,3 +14,7 @@ Highlight attribute compatibility
 
 v3.0 (12/06/2015)
 Pick to select sample feature directly on canvas
+
+v4.0 (12/06/2015)
+Fields mapping feature
+Pick to apply feature

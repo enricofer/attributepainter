@@ -10,9 +10,9 @@
 
 [general]
 name=Attribute painter
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.8
 description=Plugin for easy replication of attributes values between features
-version=3.0
+version=4.0
 author=Enrico Ferreguti
 email=enricofer@gmail.com
 
@@ -21,7 +21,7 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
- changelog=3.0 Pick to select sample feature directly on canvas
+ changelog=4.0 Fields mapping feature, pick to apply feature
 
 # tags are comma separated with spaces allowed
 tags = fields, attributes, copy, replication, vector, layer, apply, edit, table
