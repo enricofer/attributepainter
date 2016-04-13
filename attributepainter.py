@@ -79,6 +79,7 @@ class attributePainter:
         self.dock.tableWidget.setColumnCount(3)
         self.initTable()
         #setting interface behaviours
+        self.session = destinationLayerState()
         self.iface.legendInterface().currentLayerChanged.connect(self.checkOnLayerChange)
         self.iface.addDockWidget( Qt.LeftDockWidgetArea, self.apdockwidget )
         self.iface.projectRead.connect(self.resetSource)
@@ -91,6 +92,7 @@ class attributePainter:
         #Call reset procedure to initialize widget
         self.dock.tableWidget.itemChanged.connect(self.highLightCellOverride)
         self.resetSource()
+        self.actualLayer = None
 
     def selectAllCheckbox(self):
         '''
@@ -149,7 +151,7 @@ class attributePainter:
 
     def selectSource(self): 
         '''
-        lsource feauture selection procedure
+        source feature selection procedure
         '''
         if self.layerHighlighted:
             self.resetSource()
@@ -225,6 +227,8 @@ class attributePainter:
         landing method on current layer change
         '''
         if cLayer and cLayer.type() == QgsMapLayer.VectorLayer:
+            self.session.backupState(self.layerHighlighted, self.dock.tableWidget)
+            # Restore a session for the current layer or custom table items to it
             if self.layerHighlighted:
                 self.layerHighlighted.editingStarted.disconnect(self.checkEditable)
                 self.layerHighlighted.editingStopped.disconnect(self.checkEditable)
@@ -233,6 +237,7 @@ class attributePainter:
                 self.checkEditable()
                 cLayer.editingStarted.connect(self.checkEditable)
                 cLayer.editingStopped.connect(self.checkEditable)
+            self.session.restoreState(cLayer,self.dock.tableWidget)
     
     def highlightCompatibleFields(self, LayerChange = True):
         '''
@@ -288,6 +293,7 @@ class attributePainter:
         self.sourceFeat = None
         self.sourceAttrs={}
         self.activeLayer = "nn"
+        self.session.removeState(self.canvas.currentLayer())
         self.layerHighlighted = None
         #clear dock widget
         while self.dock.tableWidget.rowCount()>0:
@@ -368,7 +374,6 @@ class attributePainter:
         '''
         landing method on destination maptool identify
         '''
-        print layer,feature
         sourceAttributes = self.getSourceAttrs()
         self.applyToFeature(feature,sourceAttributes)
 
@@ -391,3 +396,75 @@ class attributePainter:
             self.canvas.setMapTool(self.destinationMapTool)
         else:
             self.canvas.setMapTool(self.oldMapTool)
+
+class destinationLayerState:
+
+    def __init__(self):
+        self.states = {}
+
+    def removeState(self, layer):
+        if layer and layer.id() in self.states.keys():
+            del self.states[layer.id()]
+            return True
+        else:
+            return None
+
+    def backupState(self, layer, table):
+        if layer:
+            stateArray = []
+            for row in range (0,table.rowCount()):
+                checked = table.item(row,0).checkState() == Qt.Checked
+                layersMap = [table.cellWidget(row,1).itemText(i) for i in range(table.cellWidget(row,1).count())]
+                currentLayer = table.cellWidget(row,1).currentIndex()
+                type = table.item(row,2).type()
+                value = table.item(row,2).data(Qt.DisplayRole)
+                isAppliable = table.item(row,2).foreground().color().value() == QColor(0,0,0).value()
+                isOverriden = table.item(row,2).background().color().value() == QColor(183,213,225).value()
+                stateArray.append([checked,layersMap,currentLayer,type,value,isAppliable,isOverriden])
+            self.states[layer.id()] = stateArray
+            print self.states
+
+    def restoreState(self,layer,table):
+        if layer.id() in self.states.keys():
+            table.blockSignals(True)
+            #clear dock widget
+            while table.rowCount()>0:
+                table.removeRow(0)
+            #add rows
+            table.setRowCount(len(self.states[layer.id()]))
+            for n in range(0, len(self.states[layer.id()])):
+                row = self.states[layer.id()][n]
+                #set first column as checkbox
+                item=QTableWidgetItem()
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                if row[0]:
+                    item.setCheckState(Qt.Checked)
+                else:
+                    item.setCheckState(Qt.Unchecked)
+                item.setText("")
+                table.setItem(n,0,item)
+                #set second column as combobox
+                combo = QComboBox();
+                combo.addItems(row[1])
+                print row[1],row[2]
+                combo.setCurrentIndex(row[2])
+                table.setCellWidget(n,1,combo)
+                #set third column as attribute value
+                item = QTableWidgetItem(row[3])
+                item.setData(Qt.DisplayRole,row[4])
+                if row[5]:
+                    item.setForeground(QBrush(QColor(0,0,0)))
+                else:
+                    item.setForeground(QBrush(QColor(130,130,130)))
+                if row[6]:
+                    item.setBackgroundColor(QColor(183,213,225))
+                table.setItem(n,2,item)
+
+            table.blockSignals(False)
+            return True
+
+        else:
+            return None
+
+
+

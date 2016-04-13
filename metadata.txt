@@ -21,7 +21,22 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
- changelog=4.0 Fields mapping feature, pick to apply feature
+changelog=4.0 Fields mapping feature, pick to apply feature, persistent layer settings during session
+
+about=Attribute Painter usage:
+ 1) Click on "Pick source feature" and select a sample feature on map.
+ 2) On the table below will appears a selection list for attributes to be applied.
+ 3) Check the attributes to be copied.
+ 4) If necessary override source attributes values editing cells
+ 5) If necessary remap destination field between those available in field combobox
+ 6) Select destination features
+ 7) Click on "Apply to selection" to apply attributes to selected features"
+ or
+ 6) Click on "Pick to Apply" to apply attributes to features one by one
+ otherwise
+ 8) Click "Reset source" to clear source selection
+ 
+ Attributes settings are now persistent changing between layers
 
 # tags are comma separated with spaces allowed
 tags = fields, attributes, copy, replication, vector, layer, apply, edit, table

@@ -15,6 +15,7 @@ Highlight attribute compatibility
 v3.0 (12/06/2015)
 Pick to select sample feature directly on canvas
 
-v4.0 (12/06/2015)
+v4.0 (13/04/2016)
 Fields mapping feature
 Pick to apply feature
+Persistent layer settings during session
