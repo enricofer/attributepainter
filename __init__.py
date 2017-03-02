@@ -23,5 +23,5 @@
 
 def classFactory(iface):
     # load attributePainter class from file attributePainter
-    from attributepainter import attributePainter
+    from .attributepainter import attributePainter
     return attributePainter(iface)

@@ -20,19 +20,26 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import uic
-from qgis.core import *
-from qgis.utils import *
-from qgis.gui import *
+from qgis.PyQt.QtCore import Qt
+if False:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from PyQt4 import uic
+    from qgis.core import *
+    from qgis.utils import *
+    from qgis.gui import *
+if True:
+    from qgis.PyQt.QtGui import QColor, QIcon, QBrush
+    from qgis.PyQt.QtWidgets import QComboBox, QDockWidget, QAction, QTableWidgetItem
+    from qgis.PyQt import uic
+    from qgis.core import QgsMapLayer
+    from qgis.gui import QgsRubberBand
 # Import the code for the dialog
-from attributepainterdialog import attributePainterDialog
-from identifygeometry import IdentifyGeometry
+from .attributepainterdialog import attributePainterDialog
+from .identifygeometry import IdentifyGeometry
 # Initialize Qt resources from file resources.py
-import resources
+#import resources
 import sip
-import os.path
 import os
 
 
@@ -46,7 +53,7 @@ class attributePainter:
         self.plugin_dir = os.path.dirname(__file__)
         # Source feature rubberband definition
         colorSource = QColor(250,0,0,200)
-        self.sourceEvid = QgsRubberBand(self.canvas, QGis.Line)
+        self.sourceEvid = QgsRubberBand(self.canvas)
         self.sourceEvid.setColor(colorSource)
         self.sourceEvid.setWidth(3)
 
@@ -80,7 +87,12 @@ class attributePainter:
         self.initTable()
         #setting interface behaviours
         self.session = destinationLayerState()
-        self.iface.legendInterface().currentLayerChanged.connect(self.checkOnLayerChange)
+        try:
+            #QGIS2 API
+            self.iface.legendInterface().currentLayerChanged.connect(self.checkOnLayerChange)
+        except:
+            #QGIS3 API
+            self.iface.currentLayerChanged.connect(self.checkOnLayerChange)
         self.iface.addDockWidget( Qt.LeftDockWidgetArea, self.apdockwidget )
         self.iface.projectRead.connect(self.resetSource)
         self.iface.newProjectCreated.connect(self.resetSource)
@@ -190,7 +202,6 @@ class attributePainter:
             self.sourceAttrs={}
             self.activeLayer = self.selectedLayer.id()
         else:
-            print "stessoLayer"
             for Attr in self.sourceAttrs:
                 self.dock.tableWidget.item(Attr,0).setCheckState(Qt.Checked)
         #Enable button to apply or reset
@@ -203,7 +214,7 @@ class attributePainter:
         landing method on cell value change
         '''
         if item.column() == 2:
-            item.setBackgroundColor (QColor(183,213,225))
+            item.setBackground(QBrush(QColor(183,213,225)))
             #item.setForeground (QBrush(QColor(255,0,0)))
 
     def toggleMapTool(self,mapTool):
@@ -312,7 +323,8 @@ class attributePainter:
                 self.applyToFeature(f,self.sourceAttributes)
             self.iface.activeLayer().removeSelection() 
         else:
-            print "nothing selected"
+            pass
+            #print ("nothing selected")
 
     def getSourceAttrs(self):
         '''
@@ -330,7 +342,7 @@ class attributePainter:
         '''
         method to apply destination fields cyclying between feature fields
         '''
-        print sourceSet.items()
+        #print (sourceSet.items())
         for attrId,attrValue in sourceSet.items():
             try:
                 feature[attrValue[0]]=attrValue[1]
@@ -357,7 +369,10 @@ class attributePainter:
         self.iface.removeToolBarIcon(self.action)
         self.iface.removeDockWidget(self.apdockwidget)
         self.canvas.mapToolSet.disconnect(self.toggleMapTool)
-        self.iface.legendInterface().currentLayerChanged.disconnect(self.checkOnLayerChange)
+        try:
+            self.iface.legendInterface().currentLayerChanged.disconnect(self.checkOnLayerChange)
+        except:
+            self.iface.currentLayerChanged.disconnect(self.checkOnLayerChange)
         self.iface.projectRead.disconnect(self.resetSource)
 
     def setSourceFeature(self, layer, feature):
@@ -422,7 +437,7 @@ class destinationLayerState:
                 isOverriden = table.item(row,2).background().color().value() == QColor(183,213,225).value()
                 stateArray.append([checked,layersMap,currentLayer,type,value,isAppliable,isOverriden])
             self.states[layer.id()] = stateArray
-            print self.states
+            #print (self.states)
 
     def restoreState(self,layer,table):
         if layer.id() in self.states.keys():
@@ -446,7 +461,7 @@ class destinationLayerState:
                 #set second column as combobox
                 combo = QComboBox();
                 combo.addItems(row[1])
-                print row[1],row[2]
+                #print (row[1],row[2])
                 combo.setCurrentIndex(row[2])
                 table.setCellWidget(n,1,combo)
                 #set third column as attribute value
@@ -457,7 +472,7 @@ class destinationLayerState:
                 else:
                     item.setForeground(QBrush(QColor(130,130,130)))
                 if row[6]:
-                    item.setBackgroundColor(QColor(183,213,225))
+                    item.setBackground(QBrush(QColor(183,213,225)))
                 table.setItem(n,2,item)
 
             table.blockSignals(False)

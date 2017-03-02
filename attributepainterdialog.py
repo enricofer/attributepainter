@@ -20,11 +20,14 @@
  ***************************************************************************/
 """
 
-from PyQt4 import QtCore, QtGui
-from ui_attributepainter import Ui_AttributePainterForm
+import os
 
+from qgis.PyQt import QtWidgets, uic
 
-class attributePainterDialog(QtGui.QWidget, Ui_AttributePainterForm):
+FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'ui_attributepainter.ui'))
+
+class attributePainterDialog(QtWidgets.QWidget, FORM_CLASS):
     def __init__(self, iface):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.setupUi(self)

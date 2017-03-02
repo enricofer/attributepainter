@@ -11,8 +11,9 @@
 [general]
 name=Attribute painter
 qgisMinimumVersion=2.8
+qgisMaximumVersion=3.99
 description=Plugin for easy replication of attributes values between features
-version=4.0
+version=5.0
 author=Enrico Ferreguti
 email=enricofer@gmail.com
 
@@ -21,7 +22,7 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-changelog=4.0 Fields mapping feature, pick to apply feature, persistent layer settings during session
+changelog=5.0 QGIS3 Migration
 
 about=Attribute Painter usage:
  1) Click on "Pick source feature" and select a sample feature on map.
