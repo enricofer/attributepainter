@@ -31,7 +31,6 @@ from qgis.PyQt.QtGui import QPixmap, QCursor
 from qgis.core import QgsVectorLayer, QgsFeature
 from qgis.gui import QgsMapToolIdentify
 
-#from cursor import Cursor
 
 
 class IdentifyGeometry(QgsMapToolIdentify):

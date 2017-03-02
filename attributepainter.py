@@ -38,7 +38,6 @@ if True:
 from .attributepainterdialog import attributePainterDialog
 from .identifygeometry import IdentifyGeometry
 # Initialize Qt resources from file resources.py
-#import resources
 import sip
 import os
 

@@ -19,3 +19,6 @@ v4.0 (13/04/2016)
 Fields mapping feature
 Pick to apply feature
 Persistent layer settings during session
+
+v5.0 (02/03/2017)
+QGIS3 migration
