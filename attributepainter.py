@@ -321,6 +321,7 @@ class attributePainter:
             for f in self.canvas.currentLayer().selectedFeatures():
                 self.applyToFeature(f,self.sourceAttributes)
             self.iface.activeLayer().removeSelection() 
+            self.canvas.currentLayer().triggerRepaint()
         else:
             pass
             #print ("nothing selected")
@@ -346,6 +347,7 @@ class attributePainter:
             try:
                 feature[attrValue[0]]=attrValue[1]
                 self.canvas.currentLayer().updateFeature(feature)
+                self.canvas.currentLayer().triggerRepaint()
             except:
                 pass
 
