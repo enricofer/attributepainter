@@ -30,7 +30,7 @@ if False:
     from qgis.gui import *
 if True:
     from qgis.PyQt.QtGui import QColor, QIcon, QBrush
-    from qgis.PyQt.QtWidgets import QComboBox, QDockWidget, QAction, QTableWidgetItem
+    from qgis.PyQt.QtWidgets import QComboBox, QDockWidget, QAction, QTableWidgetItem, QApplication
     from qgis.PyQt import uic
     from qgis.core import QgsMapLayer
     from qgis.gui import QgsRubberBand
@@ -40,6 +40,7 @@ from .identifygeometry import IdentifyGeometry
 # Initialize Qt resources from file resources.py
 import sip
 import os
+from time import sleep
 
 
 class attributePainter:
@@ -116,10 +117,16 @@ class attributePainter:
         '''
         QTableWidget initialization
         '''
-        self.dock.tableWidget.setHorizontalHeaderItem(0,QTableWidgetItem("  "))
-        self.dock.tableWidget.setHorizontalHeaderItem(1,QTableWidgetItem("FIELD"))
-        self.dock.tableWidget.setHorizontalHeaderItem(2,QTableWidgetItem("VALUE"))
-        
+        header = QTableWidgetItem("  ")
+        header.setTextAlignment(Qt.AlignLeft)
+        self.dock.tableWidget.setHorizontalHeaderItem(0,header)
+        header = QTableWidgetItem("FIELD")
+        header.setTextAlignment(Qt.AlignLeft)
+        self.dock.tableWidget.setHorizontalHeaderItem(1,header)
+        header = QTableWidgetItem("VALUE")
+        header.setTextAlignment(Qt.AlignLeft)
+        self.dock.tableWidget.setHorizontalHeaderItem(2,header)
+        self.dock.tableWidget.resizeColumnsToContents()
 
     def setComboField(self,content,type,layer):
         '''
@@ -140,14 +147,21 @@ class attributePainter:
             combo.setCurrentIndex(combo.count()-1)
         combo.activated.connect(lambda: self.highlightCompatibleFields(LayerChange=None))
         return combo
-        
+
+
+    def getFieldsIterator(self,layer):
+        try:
+            return layer.pendingFields
+        except:
+            return layer.fields
+                
 
     def scanLayerFieldsNames(self,layer):
         '''
         returns fields names as strings list
         '''
         if layer:
-            return [field.name() for field in layer.pendingFields()]
+            return [field.name() for field in self.getFieldsIterator(layer)()]
         else:
             return []
 
@@ -156,7 +170,7 @@ class attributePainter:
         returns fields types as qvariant list
         '''
         if layer:
-            return [field.type() for field in layer.pendingFields()]
+            return [field.type() for field in self.getFieldsIterator(layer)()]
         else:
             return []
 
@@ -348,8 +362,33 @@ class attributePainter:
                 feature[attrValue[0]]=attrValue[1]
                 self.canvas.currentLayer().updateFeature(feature)
                 self.canvas.currentLayer().triggerRepaint()
+            except Exception as e:
+                print ('Exception in applyToFeature',e)
+            self.highlight(feature.geometry())
+
+    def highlight(self,geometry):
+        def processEvents():
+            try:
+                qApp.processEvents()
             except:
-                pass
+                QApplication.processEvents()
+                
+        highlight = QgsRubberBand(self.canvas, geometry.type())
+        highlight.setColor(QColor("#36AF6C"))
+        highlight.setFillColor(QColor("#36AF6C"))
+        highlight.setWidth(2)
+        highlight.setToGeometry(geometry,self.canvas.currentLayer())
+        processEvents()
+        sleep(.1)
+        highlight.hide()
+        processEvents()
+        sleep(.1)
+        highlight.show()
+        processEvents()
+        sleep(.1)
+        highlight.reset()
+        processEvents()
+        
 
     def run(self):
         '''

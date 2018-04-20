@@ -22,3 +22,7 @@ Persistent layer settings during session
 
 v5.0 (02/03/2017)
 QGIS3 migration
+
+v5.1 (20/04/2018)
+QGIS3 unknown method issue fixed
+highlight feature on applying attributes
