@@ -1,5 +1,7 @@
 # Attribute Painter QGIS plugin
 
+[![Test plugin](https://github.com/enricofer/attributepainter/actions/workflows/CI_test.yml/badge.svg)](https://github.com/enricofer/attributepainter/actions/workflows/CI_test.yml)
+
 **Usage**
 
 1) Select source feature
