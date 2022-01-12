@@ -124,6 +124,7 @@ class attributePainter:
         self.iface.projectRead.connect(self.resetSource)
         self.iface.newProjectCreated.connect(self.resetSource)
         self.canvas.mapToolSet.connect(self.toggleMapTool)
+        self.oldMapTool = self.canvas.mapTool()
         self.sourceMapTool = IdentifyGeometry(self.canvas,pickMode='selection')
         self.destinationMapTool = IdentifyGeometry(self.canvas,pickMode='active')
         self.sourceMapTool.geomIdentified.connect(self.setSourceFeature)
