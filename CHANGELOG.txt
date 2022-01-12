@@ -26,3 +26,6 @@ QGIS3 migration
 v5.1 (20/04/2018)
 QGIS3 unknown method issue fixed
 highlight feature on applying attributes
+
+v5.2 (12/01/2021)
+Main dialog setup issue fix

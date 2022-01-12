@@ -13,7 +13,7 @@ name=Attribute painter
 qgisMinimumVersion=2.18
 qgisMaximumVersion=3.99
 description=Plugin for easy replication of attributes values between features
-version=5.1
+version=5.2
 author=Enrico Ferreguti
 email=enricofer@gmail.com
 
@@ -22,8 +22,8 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-changelog=5.1 QGIS3 unknown method issue fixed
- highlight feature on applying attributes
+changelog=5.2 (12/01/2021)
+ Main dialog setup issue fix
 
 about=Attribute Painter usage:
  1) Click on "Pick source feature" and select a sample feature on map.
@@ -43,7 +43,7 @@ about=Attribute Painter usage:
 # tags are comma separated with spaces allowed
 tags = fields, attributes, copy, replication, vector, layer, apply, edit, table
 
-homepage=http://geogear.wordpress.com/
+homepage=https://github.com/enricofer/attributepainter/
 tracker=https://github.com/enricofer/attributepainter/issues
 repository=https://github.com/enricofer/attributepainter/
 icon=icon.png
