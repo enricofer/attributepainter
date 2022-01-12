@@ -16,7 +16,7 @@ import unittest
 
 from qgis.PyQt.QtWidgets import QDockWidget
 
-from .attributepainterdialog import attributePainterDialog
+from ..attributepainterdialog import attributePainterDialog
 
 from utilities import get_qgis_app
 
