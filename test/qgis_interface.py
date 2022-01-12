@@ -42,6 +42,8 @@ class QgisInterface(QObject):
     so most methods are simply stubs.
     """
     currentLayerChanged = pyqtSignal(QgsMapLayer)
+    projectRead = pyqtSignal()
+    newProjectCreated = pyqtSignal()
 
     def __init__(self, canvas: QgsMapCanvas):
         """Constructor
