@@ -214,6 +214,7 @@ class attributePainter:
             pass
         #take first selected feature as source feature
         self.sourceFeat = self.selectedFeature
+        print("FEATATTRS",self.sourceFeat.attributes())
         #hightlight source feature with rubberband
         self.sourceEvid.setToGeometry(self.sourceFeat.geometry(),self.selectedLayer)
         #get current layer attributes labels list
@@ -221,6 +222,7 @@ class attributePainter:
         field_types = self.scanLayerFieldsTypes(self.selectedLayer)
         self.sourceAttrsTab=[]
         self.dock.tableWidget.setRowCount(len(field_names))
+        print ("FIELDNAMES",field_names)
         #loading attributes labels and values in QTableWidget
         for n in range(0,len(field_names)):
                 item=QTableWidgetItem()
