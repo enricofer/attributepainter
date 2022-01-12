@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import QDockWidget
 
 from ..attributepainterdialog import attributePainterDialog
 
-from utilities import get_qgis_app
+from .utilities import get_qgis_app
 
 QGIS_APP = get_qgis_app()
 
