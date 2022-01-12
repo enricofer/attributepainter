@@ -35,11 +35,11 @@ class apPluginTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.plugin = attributePainter(IFACE)
-        self.vector_driver = QgsVectorLayer(os.path.join(self.plugin.plugin_dir,"test","testdata.gpkg|layername=testdata"),"testdata","ogr")
+        self.vector = QgsVectorLayer(os.path.join(self.plugin.plugin_dir,"test","testdata.gpkg|layername=testdata"),"testdata","ogr")
 
     def tearDown(self):
         """Runs after each test."""
-        self.vector_driver = None
+        self.vector = None
 
     def test_plugin_loaded(self):
         """Test plugin loaded"""
@@ -47,7 +47,13 @@ class apPluginTest(unittest.TestCase):
 
     def test_layer_ok(self):
         """Test testdata layer loaded"""
-        self.assertTrue(self.vector_driver)
+        self.assertTrue(self.vector)
+
+    def test_load_source(self):
+        """Test source loaded"""
+        feature = self.vector.getFeature(0)
+        self.plugin.setSourceFeature(self, self.vector, feature)
+        self.assertTrue(self.plugin.selectedFeature)
 
 if __name__ == "__main__":
     suite = unittest.makeSuite(apPluginTest)
