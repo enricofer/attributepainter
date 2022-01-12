@@ -69,7 +69,7 @@ class attributePainter:
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu(u"&foglioMappale", self.action)
         #creating dock view intance
-        self.dock = attributePainterDialog(self.iface)
+        self.dock = attributePainterDialog()
         self.apdockwidget=QDockWidget("AttributePainter" , self.iface.mainWindow() )
         self.apdockwidget.setObjectName("AttributePainter")
         self.apdockwidget.setWidget(self.dock)

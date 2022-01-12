@@ -28,6 +28,6 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui_attributepainter.ui'))
 
 class attributePainterDialog(QtWidgets.QWidget, FORM_CLASS):
-    def __init__(self, iface):
-        QtWidgets.QWidget.__init__(self)
+    def __init__(self,*args,**kwargs):
+        QtWidgets.QWidget.__init__(self,*args,**kwargs)
         self.setupUi(self)
