@@ -13,6 +13,7 @@ __date__ = '2022-01-12'
 __copyright__ = 'Copyright 2022, enricofer@gmail.com'
 
 import unittest
+from attributepainter import attributePainter
 
 from qgis.PyQt.QtWidgets import QDockWidget
 from qgis.core import (
@@ -21,9 +22,9 @@ from qgis.core import (
 
 from .utilities import get_qgis_app
 
-QGIS_APP = get_qgis_app()
+QGISAPP, CANVAS, IFACE, PARENT = get_qgis_app()
 
-from qgis.utils import plugins
+from ..attributepainter import attributePainter
 
 import os
 
@@ -33,7 +34,7 @@ class apPluginTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.plugin = plugins["attributepainter"]
+        self.plugin = attributePainter(IFACE)
         self.vector_driver = QgsVectorLayer(os.path.join(self.plugin.plugin_dir,"test","testdata.gpkg|layername=testdata"),"testdata","ogr")
 
     def tearDown(self):
@@ -42,7 +43,7 @@ class apPluginTest(unittest.TestCase):
 
     def test_plugin_loaded(self):
         """Test plugin loaded"""
-        self.assertTrue(self.plugin)
+        self.assertEqual(type(self.plugin),attributePainter)
 
     def test_layer_ok(self):
         """Test testdata layer loaded"""
