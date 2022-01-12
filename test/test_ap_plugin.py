@@ -52,7 +52,7 @@ class apPluginTest(unittest.TestCase):
     def test_load_source(self):
         """Test source loaded"""
         self.plugin.initGui()
-        feature = self.vector.getFeature(0)
+        feature = self.vector.getFeature(1)
         self.plugin.setSourceFeature(self.vector, feature)
         self.assertTrue(self.plugin.selectedFeature)
 
