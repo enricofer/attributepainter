@@ -31,6 +31,7 @@ if False:
 if True:
     from qgis.PyQt.QtGui import QColor, QIcon, QBrush
     from qgis.PyQt.QtWidgets import QComboBox, QDockWidget, QAction, QTableWidgetItem, QApplication
+    from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
     from qgis.PyQt import uic
     from qgis.core import QgsMapLayer
     from qgis.gui import QgsRubberBand
@@ -56,6 +57,32 @@ class attributePainter:
         self.sourceEvid = QgsRubberBand(self.canvas)
         self.sourceEvid.setColor(colorSource)
         self.sourceEvid.setWidth(3)
+        # initialize locale
+        locale = QSettings().value('locale/userLocale')[0:2]
+        locale_path = os.path.join(
+            self.plugin_dir,
+            'i18n',
+            'ap_{}.qm'.format(locale))
+
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
+            QCoreApplication.installTranslator(self.translator)
+
+    # noinspection PyMethodMayBeStatic
+    def tr(self, message):
+        """Get the translation for a string using Qt translation API.
+
+        We implement this ourselves since we do not inherit QObject.
+
+        :param message: String for translation.
+        :type message: str, QString
+
+        :returns: Translated version of message.
+        :rtype: QString
+        """
+        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+        return QCoreApplication.translate('reportWizard', message)
 
 
     def initGui(self):

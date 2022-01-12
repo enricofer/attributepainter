@@ -46,7 +46,7 @@ class QGISTest(unittest.TestCase):
             '0.0174532925199433]]')
         crs.createFromWkt(wkt)
         auth_id = crs.authid()
-        expected_auth_id = 'EPSG:4326'
+        expected_auth_id = 'OGC:CRS84' #'EPSG:4326'
         self.assertEqual(auth_id, expected_auth_id)
 
         # now test for a loaded layer
