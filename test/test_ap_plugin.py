@@ -13,7 +13,7 @@ __date__ = '2022-01-12'
 __copyright__ = 'Copyright 2022, enricofer@gmail.com'
 
 import unittest
-from attributepainter import attributePainter
+from ..attributepainter import attributePainter
 
 from qgis.PyQt.QtWidgets import QDockWidget
 from qgis.core import (
