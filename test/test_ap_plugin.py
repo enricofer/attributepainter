@@ -28,7 +28,7 @@ from qgis.utils import plugins
 import os
 
 
-class apDockWidgetTest(unittest.TestCase):
+class apPluginTest(unittest.TestCase):
     """Test dockwidget works."""
 
     def setUp(self):
@@ -41,15 +41,15 @@ class apDockWidgetTest(unittest.TestCase):
         self.vector_driver = None
 
     def test_plugin_loaded(self):
-        """Test we can click OK."""
+        """Test plugin loaded"""
         self.assertTrue(self.plugin)
 
     def test_layer_ok(self):
-        """Test we can click OK."""
+        """Test testdata layer loaded"""
         self.assertTrue(self.vector_driver)
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(apDockWidgetTest)
+    suite = unittest.makeSuite(apPluginTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
