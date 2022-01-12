@@ -14,9 +14,9 @@ __copyright__ = 'Copyright 2022, enricofer@gmail.com'
 
 import unittest
 
-from qgis.PyQt.QtGui import QDockWidget
+from qgis.PyQt.QtWidgets import QDockWidget
 
-from ap_dockwidget import apDockWidget
+from .attributepainterdialog import attributePainterDialog
 
 from utilities import get_qgis_app
 
@@ -28,7 +28,7 @@ class apDockWidgetTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.dockwidget = apDockWidget(None)
+        self.dockwidget = attributePainterDialog(None)
 
     def tearDown(self):
         """Runs after each test."""
@@ -36,10 +36,11 @@ class apDockWidgetTest(unittest.TestCase):
 
     def test_dockwidget_ok(self):
         """Test we can click OK."""
+        self.dockwidget.PickSource.click()
         pass
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(apDialogTest)
+    suite = unittest.makeSuite(apDockWidgetTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
