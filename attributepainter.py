@@ -146,7 +146,6 @@ class attributePainter:
         '''
         QTableWidget initialization
         '''
-        print("initTable")
         header = QTableWidgetItem("  ")
         header.setTextAlignment(Qt.AlignLeft)
         self.dock.tableWidget.setHorizontalHeaderItem(0,header)
@@ -162,7 +161,6 @@ class attributePainter:
         '''
         returns a qcombobox loaded with compatible field names (depending on selected layer)
         '''
-        print("setComboField",content,type,layer)
         combo = QComboBox();
         fieldNames = self.scanLayerFieldsNames(layer)
         fieldTypes = self.scanLayerFieldsTypes(layer)
@@ -181,7 +179,6 @@ class attributePainter:
 
 
     def getFieldsIterator(self,layer):
-        print("getFieldsIterator",layer)
         try:
             return layer.pendingFields
         except:
@@ -192,7 +189,6 @@ class attributePainter:
         '''
         returns fields names as strings list
         '''
-        print("scanLayerFieldsNames")
         if layer:
             return [field.name() for field in self.getFieldsIterator(layer)()]
         else:
@@ -202,7 +198,6 @@ class attributePainter:
         '''
         returns fields types as qvariant list
         '''
-        print("scanLayerFieldsTypes")
         if layer:
             return [field.type() for field in self.getFieldsIterator(layer)()]
         else:
@@ -212,7 +207,6 @@ class attributePainter:
         '''
         source feature selection procedure
         '''
-        print("selectSource")
         if self.layerHighlighted:
             self.resetSource()
         try:
@@ -261,7 +255,6 @@ class attributePainter:
         '''
         landing method on cell value change
         '''
-        print("highLightCellOverride", item)
         if item.column() == 2:
             item.setBackground(QBrush(QColor(183,213,225)))
             #item.setForeground (QBrush(QColor(255,0,0)))
@@ -270,7 +263,6 @@ class attributePainter:
         '''
         landing method on canvas maptool change
         '''
-        print("toggleMapTool", mapTool)
         self.dock.PickSource.blockSignals(True)
         self.dock.PickApply.blockSignals(True)
         if mapTool != self.sourceMapTool and mapTool != self.destinationMapTool:
@@ -287,7 +279,6 @@ class attributePainter:
         '''
         landing method on current layer change
         '''
-        print("checkOnLayerChange", cLayer)
         if cLayer and cLayer.type() == QgsMapLayer.VectorLayer:
             # Restore a session for the current layer or custom table items to it
             if self.layerHighlighted:
@@ -305,7 +296,6 @@ class attributePainter:
         '''
         method to highlight compatible field on selected feature (even on different layer)
         '''
-        print("highlightCompatibleFields", LayerChange)
         if self.dock.tableWidget.rowCount()>0:
             source_field_names = self.scanLayerFieldsNames(self.selectedLayer)
             source_field_types = self.scanLayerFieldsTypes(self.selectedLayer)
@@ -326,7 +316,6 @@ class attributePainter:
         '''
         method to enable or disable apply to destination button
         '''
-        print("checkEditable")
         if self.layerHighlighted:
             self.highlightCompatibleFields()
             if self.layerHighlighted.isEditable() and self.sourceFeat:
@@ -340,7 +329,6 @@ class attributePainter:
         '''
         method to clear source and reset attribute table
         '''
-        print("resetSource")
         self.dock.tableWidget.itemChanged.disconnect(self.highLightCellOverride)
         self.doReset()
         #if self.canvas.layers()!=[]:
@@ -351,7 +339,6 @@ class attributePainter:
         '''
         method to clear source and reset attribute table
         '''
-        print("doReset")
         self.dock.PickDestination.setDisabled(True)
         #clear source highlight
         self.sourceEvid.reset()
@@ -371,7 +358,6 @@ class attributePainter:
         '''
         method to apply selected fields to selected destination features
         '''
-        print("applyToDestination")
         if self.canvas.currentLayer().selectedFeatures()!=[]:
             self.sourceAttributes = self.getSourceAttrs()
             #apply source attribute values to selected destination features
@@ -387,7 +373,6 @@ class attributePainter:
         '''
         rebuild source attribute dict set to apply to destination features
         '''
-        print("getSourceAttrs")
         sourceAttrs={}
         for rowTabWidget in range(0,self.dock.tableWidget.rowCount()):
             rowCheckbox = self.dock.tableWidget.item(rowTabWidget,0)
@@ -400,7 +385,6 @@ class attributePainter:
         '''
         method to apply destination fields cyclying between feature fields
         '''
-        print("applyToFeature", feature, sourceSet)
         #print (sourceSet.items())
         for attrId,attrValue in sourceSet.items():
             try:
@@ -418,7 +402,6 @@ class attributePainter:
             except:
                 QApplication.processEvents()
         
-        print("highlight")
         highlight = QgsRubberBand(self.canvas, geometry.type())
         highlight.setColor(QColor("#36AF6C"))
         highlight.setFillColor(QColor("#36AF6C"))
@@ -440,7 +423,6 @@ class attributePainter:
         '''
         show/hide the widget
         '''
-        print("run")
         if self.apdockwidget.isVisible():
             self.apdockwidget.hide()
             self.resetSource()
@@ -451,7 +433,6 @@ class attributePainter:
         '''
         Remove the plugin widget and clear source feature highlight
         '''
-        print("unload")
         if self.sourceFeat:
             self.sourceEvid.reset()
         self.iface.removeToolBarIcon(self.action)
@@ -467,7 +448,6 @@ class attributePainter:
         '''
         landing method on source maptool identify
         '''
-        print("setSourceFeature", layer, feature)
         self.selectedLayer = layer
         self.selectedFeature = feature
         self.dock.PickSource.setChecked(False)
@@ -478,7 +458,6 @@ class attributePainter:
         '''
         landing method on destination maptool identify
         '''
-        print("setDestinationFeature", layer, feature)
         sourceAttributes = self.getSourceAttrs()
         self.applyToFeature(feature,sourceAttributes)
 
@@ -486,7 +465,6 @@ class attributePainter:
         '''
         landing method on pick source button toggle
         '''
-        print("setSourceMapTool", checked)
         if checked:
             self.oldMapTool = self.canvas.mapTool()
             self.canvas.setMapTool(self.sourceMapTool)
@@ -497,7 +475,6 @@ class attributePainter:
         '''
         landing method on pick apply button toggle
         '''
-        print("setDestinationMapTool",checked)
         if checked:
             self.oldMapTool = self.canvas.mapTool()
             self.canvas.setMapTool(self.destinationMapTool)
@@ -510,7 +487,6 @@ class destinationLayerState:
         self.states = {}
 
     def removeState(self, layer):
-        print("removeState",layer)
         if layer and layer.id() in self.states.keys():
             del self.states[layer.id()]
             return True
@@ -518,7 +494,6 @@ class destinationLayerState:
             return None
 
     def backupState(self, layer, table):
-        print("backupState", layer, table)
         if layer:
             stateArray = []
             for row in range (0,table.rowCount()):
@@ -534,7 +509,6 @@ class destinationLayerState:
             #print (self.states)
 
     def restoreState(self,layer,table):
-        print("restoreState", layer, table)
         if layer.id() in self.states.keys():
             table.blockSignals(True)
             #clear dock widget
