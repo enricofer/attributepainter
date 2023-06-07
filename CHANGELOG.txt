@@ -29,3 +29,6 @@ highlight feature on applying attributes
 
 v5.2 (12/01/2021)
 Main dialog setup issue fix
+
+v5.3 (07/06/2023)
+Changing or loading layers issues fix

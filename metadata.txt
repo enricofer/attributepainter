@@ -12,7 +12,7 @@
 name=Attribute painter
 qgisMinimumVersion=2.18
 qgisMaximumVersion=3.99
-description=Plugin for easy replication of attributes values between features
+description=Plugin for easy replication of attributes values between features of the same or even different layer
 version=5.2
 author=Enrico Ferreguti
 email=enricofer@gmail.com
@@ -22,8 +22,8 @@ email=enricofer@gmail.com
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-changelog=5.2 (12/01/2021)
- Main dialog setup issue fix
+changelog=v5.3 (07/06/2023)
+ Changing or loading layers issues fix
 
 about=Attribute Painter usage:
  1) Click on "Pick source feature" and select a sample feature on map.

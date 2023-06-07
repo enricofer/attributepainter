@@ -7,8 +7,8 @@
 1) Select source feature
 2) Click on "Pick source feature". On the table below will get a selection list for attributes to be applied
 3) Check the attributes to be copied
-4) If needed override field selecting an alternative field mapping
-5) If necessary override source attributes values editing cells
+4) If needed override field assignment selecting an alternative field mapping
+5) If necessary override source attributes values manually editing cells
 6) Select destination features
 7) Click on "Apply to selection" to apply attributes to selected features
 
