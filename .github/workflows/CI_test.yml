@@ -1,4 +1,4 @@
-name: Test plugin
+name: Test attributepainter plugin
 
 on:
   push:
